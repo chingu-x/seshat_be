@@ -1,27 +1,25 @@
 // Demo data
-
 let posts = [
   {
-      id: 1,
-      title: 'This is an experiment',
+    id: 1,
+    title: 'This is an experiment',
   },
   {
-      id: 2,
-      title: 'Fastify is pretty cool',
+    id: 2,
+    title: 'Fastify is pretty cool',
   },
   {
-      id: 3,
-      title: 'Just another post, yea!',
+    id: 3,
+    title: 'Just another post, yea!',
   }
 ];
 
 // Handlers
-
 const addPost = async (req, res) => {
   const id = posts.length + 1 // generate new ID
   const newpost = {
-      id,
-      title: req.body.title,
+    id,
+    title: req.body.title,
   }
 
   posts.push(newpost)
