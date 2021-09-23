@@ -1,4 +1,7 @@
+const dotenv = require('dotenv')
 const app = require('fastify')({logger: true})
+
+dotenv.config( { path: './.env', silent: true } )
 
 // handle CORS
 app.register(require('fastify-cors'), { 
@@ -22,9 +25,9 @@ app.get('/', (req, res) => {
 })
 
 // Register routes to handle blog posts
-const blogRoutes = require('./routes/blogs')
+const soloprojectRoutes = require('./routes/soloprojects')
 
-blogRoutes.forEach((route, index) => {
+soloprojectRoutes.forEach((route, index) => {
   app.route(route)
 })
 
