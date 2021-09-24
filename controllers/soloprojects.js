@@ -34,7 +34,6 @@ const getCalendarEvents = async (request, response) => {
         response.code(501).send(error)
       }
     }
-    console.log('Controller soloprojects - scheduledEvents: ', scheduledVoyages)
     response.code(200).send({ scheduledVoyages })
   })
 }

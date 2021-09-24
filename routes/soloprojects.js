@@ -1,4 +1,4 @@
-const soloprojectsController = require('../controller/soloprojects')
+const soloprojectsController = require('../controllers/soloprojects')
 
 const routes = [
   {
