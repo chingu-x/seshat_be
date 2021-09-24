@@ -20,13 +20,12 @@ app.addContentTypeParser('*', function (request, payload, done) {
 })  
 
 // Add the index route  
-app.get('/', (req, res) => {
-  res.send('You are in Index route')
+app.get('/', (request, response) => {
+  response.send('You are in Index route')
 })
 
 // Register routes to handle blog posts
 const soloprojectRoutes = require('./routes/soloprojects')
-
 soloprojectRoutes.forEach((route, index) => {
   app.route(route)
 })

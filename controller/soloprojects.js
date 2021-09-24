@@ -1,36 +1,41 @@
 const Airtable = require('airtable')
 
-const getCalendarEvents = (req, res) => {
+const getCalendarEvents = async (request, response) => {
   const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE)
-  const filter = "Type = \"" + "Voyage" + "\""
+  const now = new Date()
+  const filter = "AND(" + 
+    "IS_AFTER({Start Date},DATETIME_PARSE(\"" + now.toISOString().slice(0,10) + "\",\"YYYY-MM-DD\")), " +
+    "Type = \"" + "Voyage" + "\"" +
+  ")"
 
   let scheduledVoyages = []
 
   base('Schedules').select({ 
-    pageSize: 12,
-    fields: ['Name', 'Type', 'Start Date', 'End Date'],
+    // fields: ['Name', 'Type', 'Start Date', 'End Date'],
     filterByFormula: filter,
     view: 'Schedules' 
   })
-  .firstPage(function page(err, records) {
-    if (err) { console.error(err); return; }
-
-    records.forEach(function(record) {
+  .firstPage(async (error, records) => {
+    if (error) {
+      response.code(501).send(error)
+    }
+    for (let record of records) {
       try {
         const voyageName = record.get('Name')
         const voyageStartDt = record.get('Start Date')
         const voyageEndDt = record.get('End Date')
-        console.log('Retrieved', record.get('Name'))
         scheduledVoyages.push({
           voyageName: voyageName,
           startDt: voyageStartDt,
           endDt: voyageEndDt,
         })
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.log('Error in loop: ')
+        response.code(501).send(error)
       }
-    })
-      return scheduledEvents
+    }
+    console.log('Controller soloprojects - scheduledEvents: ', scheduledVoyages)
+    response.code(200).send({ scheduledVoyages })
   })
 }
 
