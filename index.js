@@ -36,7 +36,7 @@ facilitatorRoutes.forEach((route, index) => {
   app.route(route)
 })
 
-app.listen(process.env.PORT, (err, address) => {
+app.listen(process.env.API_PORT, (err, address) => {
   if (err) {
     app.log.error(err)
     process.exit(1)
