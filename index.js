@@ -24,6 +24,11 @@ app.get('/', (request, response) => {
   response.send('You are in Index route')
 })
 
+// Register routes to handle authentication
+const authRoutes = require('./routes/authentication')
+authRoutes.forEach((route, index) => {
+  app.route(route)
+})
 // Register routes to handle Solo Project actions
 const soloprojectRoutes = require('./routes/soloprojects')
 soloprojectRoutes.forEach((route, index) => {
