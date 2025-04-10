@@ -1,5 +1,35 @@
 {
+  "name": "seshat_be",
+  "version": "1.0.0",
+  "description": "Chingu Discord BE metrics services",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chingu-x/seshat_be.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chingu-x/seshat_be/issues"
+  },
+  "homepage": "https://github.com/chingu-x/seshat_be#readme",
   "dependencies": {
-    "fastify": "^3.21.2"
+    "body-parser": "^1.19.0",
+    "chalk": "^5.4.1",
+    "cors": "^2.8.5",
+    "discord.js": "^14.18.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
+    "node-mailjet": "^3.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
