@@ -112,16 +112,8 @@ export default class Discord {
 
   // Get a specific channel which matches the caller-supplied regular expression
   async getChannel(channelID) {
-    let guildChannels = await this.guild.channels.fetch()
-
-    // Retrieve the requested channel
-    for (let [channelId, channel] of guildChannels) {
-      if (channelID === channel.id) {
-        return channel
-      }
-    }
-    
-    return undefined
+    let channel = await this.guild.channels.fetch(channelID)
+    return channel
   }
 
   // Get the team channels and their parent categories for the specified Voyage. 

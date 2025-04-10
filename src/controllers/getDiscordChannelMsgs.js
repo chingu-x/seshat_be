@@ -9,12 +9,13 @@ let messageSummary = []
 // `messageSummary` object for each voyage, team, sprint, and team member.
 const collectMessages = async (message, messageSummary) => {
   return new Promise(async (resolve, reject) => {
-    console.log('extractDiscordChannelMsgs - summarizeMessages - message:', message)
+    //console.log('extractDiscordChannelMsgs - summarizeMessages - message:', message)
     const discordUserName = message.author.username
       try {
         // Update the array of messages 
         messageSummary.push({
-          message: message, 
+          author: message.author.username,
+          url: message.content, 
           createdAt: message.createdAt
         })
         resolve()
@@ -28,6 +29,8 @@ const collectMessages = async (message, messageSummary) => {
 
 // Extract team message metrics from the Discord channels
 const getDiscordChannelMsgs = async (req, res) => {
+  res.status(200).json({ status: "Ready to get to work..." });
+
   console.log(chalk.white(`...Connecting to Discord...`))
   discordIntf = new Discord()
   const DISCORD_TOKEN = process.env.DISCORD_TOKEN
@@ -49,7 +52,8 @@ const getDiscordChannelMsgs = async (req, res) => {
       // Retrieve all messages in the channel. There is one row in the channel
       // messageSummary array for each team and within each row there is
       // an embedded array with one cell per Sprint.
-      const channel = discordIntf.getChannel(DISCORD_CHANNEL_ID)
+      const channel = await discordIntf.getChannel(DISCORD_CHANNEL_ID)
+      console.log(`channel: `, channel)
       if (channel.type === GUILD_TEXT) {
         await discordIntf.fetchAllMessages(channel, collectMessages, messageSummary)
       } else if (channel.type === GUILD_FORUM) {
