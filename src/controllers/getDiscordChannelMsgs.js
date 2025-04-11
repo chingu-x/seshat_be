@@ -7,30 +7,29 @@ let messageSummary = []
 
 // Invoked as a callback from Discord.fetchAllMessages this fills in the
 // `messageSummary` object for each voyage, team, sprint, and team member.
-const collectMessages = async (message, messageSummary) => {
+const collectMessages = async (message, msgName, appliedTags, messageSummary) => {
   return new Promise(async (resolve, reject) => {
     //console.log('extractDiscordChannelMsgs - summarizeMessages - message:', message)
-    const discordUserName = message.author.username
-      try {
-        // Update the array of messages 
-        messageSummary.push({
-          author: message.author.username,
-          url: message.content, 
-          createdAt: message.createdAt
-        })
-        resolve()
-      } catch (error) {
-        console.log(chalk.white(`extractDiscordChannelMsgs - summarizeMessages: Error processing teamNo: ${ chalk.green(teamNo) } sprintNo: ${ chalk.green(sprintNo) }`))
-        console.log(chalk.white(error))
-        reject(error)
-      }
+    try {
+      // Update the array of messages 
+      messageSummary.push({
+        author: message.author.username,
+        name: msgName,
+        appliedTags: appliedTags,
+        url: message.content, 
+        createdAt: message.createdAt
+      })
+      resolve()
+    } catch (error) {
+      console.log(chalk.white(`extractDiscordChannelMsgs - summarizeMessages: Error processing teamNo: ${ chalk.green(teamNo) } sprintNo: ${ chalk.green(sprintNo) }`))
+      console.log(chalk.white(error))
+      reject(error)
+    }
   })
 }
 
 // Extract team message metrics from the Discord channels
 const getDiscordChannelMsgs = async (req, res) => {
-  res.status(200).json({ status: "Ready to get to work..." });
-
   console.log(chalk.white(`...Connecting to Discord...`))
   discordIntf = new Discord()
   const DISCORD_TOKEN = process.env.DISCORD_TOKEN
@@ -49,26 +48,21 @@ const getDiscordChannelMsgs = async (req, res) => {
     client.on('ready', async () => {
       console.time(chalk.white(`...Fetching all messages`))
 
-      // Retrieve all messages in the channel. There is one row in the channel
-      // messageSummary array for each team and within each row there is
-      // an embedded array with one cell per Sprint.
+      // Retrieve all messages in the channel.
       const channel = await discordIntf.getChannel(DISCORD_CHANNEL_ID)
-      console.log(`channel: `, channel)
-      if (channel.type === GUILD_TEXT) {
-        await discordIntf.fetchAllMessages(channel, collectMessages, messageSummary)
-      } else if (channel.type === GUILD_FORUM) {
+      if (channel.type === GUILD_FORUM) {
         const threads = await channel.threads.fetch()
         const forumThreads = Array.from(threads.threads).map(thread => thread[1])
         for (let thread of forumThreads) {
-        await discordIntf.fetchAllMessages(thread, collectMessages, messageSummary)
+          //console.log(chalk.white(`...Processing thread - `),thread)
+          await discordIntf.fetchAllMessages(thread, collectMessages, messageSummary)
         }
+        res.status(200).json(messageSummary)
       } else {
         console.log(chalk.white(`Skipping unsupported channel type - ${ chalk.green(channel.type) } / ${ chalk.green(channel.id) } / ${ chalk.green(channel.name) }`))
       }
 
       console.timeEnd(chalk.white(`...Fetching all messages`))
-
-      console.timeEnd(chalk.white(`...Updating Voyage Status...`))
 
       // Terminate processing
       discordIntf.commandResolve('done')

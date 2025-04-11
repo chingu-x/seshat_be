@@ -68,9 +68,11 @@ export default class Discord {
     try {
       do {
         const messages = await channel.messages.fetch(fetchOptions)
+        console.log(`...messages.size: ${ messages.size }`)
         if (messages.size > 0) {
           for (let [messageID, message] of messages) {
-            await callback(message, messageSummary) // Invoke the callback function to process messages
+            // Invoke the callback function to process messages
+            await callback(message, channel.name, channel.appliedTags,  messageSummary)
           }
           fetchOptions = { limit: 100, before: messages.last().id }
         } else {
@@ -87,76 +89,11 @@ export default class Discord {
   getDiscordClient() {
     return this.client
   }
-    
-  // Retrieve the users Discord name using their unique id
-  async getGuildUser(discordId) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const users = await this.guild.members.fetch()
-        for (let user of users) {
-          const [id, userInfo] = user
-          if (id === discordId) {
-            resolve(userInfo)
-          }
-        }
-        reject(null)
-      }
-      catch(error) {
-        console.error('='.repeat(30))
-        console.error(`Error retrieving user ${ discordId } from Discord:`)
-        console.error(error)
-        reject(null)
-      }
-    })
-  }
 
   // Get a specific channel which matches the caller-supplied regular expression
   async getChannel(channelID) {
     let channel = await this.guild.channels.fetch(channelID)
     return channel
-  }
-
-  // Get the team channels and their parent categories for the specified Voyage. 
-  async getTeamChannels(voyageName, categoryRegex, channelRegex) {
-    console.log(chalk.white(`getTeamChannels - voyageName:${ chalk.green(voyageName) } categoryRegex:${ chalk.green(categoryRegex) } channelRegex:${ chalk.green(channelRegex) }`))
-    // Locate all the categories for this Voyage
-    let voyageCategories = []
-    let guildChannels = await this.guild.channels.fetch()
-    let categoryIds = []
-    guildChannels.forEach(guildChannel => {
-      if (guildChannel.type === GUILD_CATEGORY && guildChannel.name.toUpperCase().substring(0,3) === voyageName.toUpperCase()) {
-        voyageCategories.push(guildChannel)
-        categoryIds.push(guildChannel.id)
-      }
-    })
-
-    // Retrieve the list of channels for this Voyage
-    // Start by building a list of all text and forum channels owned by the
-    // selected categories
-    let voyageChannels = []
-    guildChannels.forEach(channel => {
-      const categoryFound = categoryIds.includes(channel.parentId)
-      if (categoryFound === true) {
-        voyageChannels.push(channel)
-      }
-    })
-
-    // Sort the team channels by their names 
-    let sortedChannels = []
-    for (let channel of voyageChannels) {
-      const result = channel.name.match(channelRegex)
-      if (result !== null) {
-        sortedChannels.push(channel)
-      }
-    }
-    sortedChannels.sort((a, b) => {
-      // Sort in ascending team number sequence
-      return parseInt(a.name.substr(a.name.length - 2)) >= parseInt(b.name.substr(b.name.length - 2)) 
-        ? 1 
-        : -1
-    })
-    
-    return sortedChannels
   }
 
   setGuild(guild) {
