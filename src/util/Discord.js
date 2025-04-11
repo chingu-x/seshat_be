@@ -62,27 +62,30 @@ export default class Discord {
   // Fetch all messages from the selected Discord team channels.
   // Note that the `callback` routine is invoked for each message to
   // accumulate any desired metrics.
-  async fetchAllMessages(channel, callback, messageSummary) {
+  async fetchAllMessages(thread, callback, messageSummary) {
     let isMoreMessages = true
     let fetchOptions = { limit: 100 }
+    let lastMessageID = null
     try {
+      // Fetch messages in the channel
       do {
-        const messages = await channel.messages.fetch(fetchOptions)
-        console.log(`...messages.size: ${ messages.size }`)
+        const messages = await thread.messages.fetch(fetchOptions)
         if (messages.size > 0) {
           for (let [messageID, message] of messages) {
             // Invoke the callback function to process messages
-            await callback(message, channel.name, channel.appliedTags,  messageSummary)
+            await callback(message, thread.name, thread.appliedTags,  messageSummary)
+            lastMessageID = messageID
           }
-          fetchOptions = { limit: 100, before: messages.last().id }
+          fetchOptions = { limit: 100, cache: false, before: lastMessageID}
         } else {
           isMoreMessages = false // Stop fetching messages for this channel
         }
       } while (isMoreMessages)
+      // Resolve the command promise
       return
     } catch (error) {
       console.error(error)
-      throw new Error(`Error retrieving messages for channel: ${ channel.name } ${ error }`)
+      throw new Error(`Error retrieving messages for channel: ${ thread.name } ${ error }`)
     }
   }
 
@@ -92,7 +95,7 @@ export default class Discord {
 
   // Get a specific channel which matches the caller-supplied regular expression
   async getChannel(channelID) {
-    let channel = await this.guild.channels.fetch(channelID)
+    let channel = await this.guild.channels.fetch(channelID, {force: true})
     return channel
   }
 
